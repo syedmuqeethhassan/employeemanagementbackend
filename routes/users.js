@@ -7,11 +7,64 @@ var mongodb = require("mongodb")
 var ObjectID = require('mongodb').ObjectID;
 const bcrypt = require("bcrypt");
 
+/* GET users listing. */
+router.get('/', function (req, res, next) {
+  users.find(function (err, users) {
+    if (err) {
+      res.json(err);
+    }
+    res.type('json');
+    res.status(200).json(users);
+  }
+  );
+});
+router.get('/users', function (req, res, next) {
+  users.find(function (err, users) {
+    if (err) {
+      res.json(err);
+    }
+    res.type('json');
+    res.status(200).json(users);
+  }
+  );
+});
+router.post('/', function (req, res, next) {
+  users.find(function (err, users) {
+    if (err) {
+      res.json(err);
+    }
+    res.type('json');
+    res.status(200).json(users);
+  }
+  );
+});
+//login api below
+router.post('/login',async function (req, res, next) {
+  
+  users.findOne({ username: req.body.username },async (error, data) => {
+    if (error){
+      res.json({ 'error': error, code: 500 });
+    }
+    else{
+      console.log('login else statement')
+      console.log(data)
+      console.log(req.body.password)
+      const validPassword = await bcrypt.compare(req.body.password, data.password);
+    if(validPassword){
+      console.log(data,'data')
+      res.json(data)
+    }
+    else{
+      res.status(400).json("usuccessful login")
+    }
+    } 
+  })
+  
+    
 
+});
 
-
-
-
+//add user api
 router.post('/add-user', async function (req, res) {
   console.log('control is coming to post')
   const salt = await bcrypt.genSalt(10);
@@ -52,7 +105,7 @@ else{
         if(err){
           res.send({ err: err});
         } else{
-          res.send("user created")
+          res.json(userObject)
         }
         
       })
@@ -63,40 +116,6 @@ else{
   }
 }
 }
-
-
-
-
-
-
-/* GET users listing. */
-router.get('/', function (req, res, next) {
-  users.find(function (err, users) {
-    if (err) {
-      res.json(err);
-    }
-    res.type('json');
-    res.status(200).json(users);
-  }
-  );
-});
-//login api below
-// router.post('/login', function (req, res, next) {
-//   users.find({ username: req.body.username }, (error, data) => {
-//     if (error) res.send({ 'error': error, code: 500 });
-//     if (login) {
-//       if (req.body.password == data[0].password) {
-//         res.json({ data: data, code: 200 })
-//       }
-//     } else {
-//       res.json({ error: 'error', code: 400 })
-//     }
-//   })
-
-// });
-
-//add user api
-
 
 
   // if (userExists != null) {
