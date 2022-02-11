@@ -4,7 +4,9 @@ const schema = mongoose.Schema;
 var userSchema = new schema({
         username: String,
         password: String,
-        phonenumber: Number,
+        phonenumber: {
+                type:Number
+        },
         name: String,
         gender: String,
         age: Number,
