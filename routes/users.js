@@ -126,40 +126,42 @@ else{
   //   res.status(200).json('inserted')
   // }
 })
-//issue with param and hexadecimal,string
-// router.delete('/delete/:id', async function (req, res) {
-//   let id = req.params.id
-//   console.log(id)
-//   result = await users.remove({ _id: id });
-//   if (result) {
-//     res.json("success")
-//   }
-//   else {
-//     res.json("error")
-//   }
-// })
+// issue with param and hexadecimal,string
+router.delete('/delete/:id', async function (req, res) {
+  let id = req.params.id
+  console.log(id)
+  result = await users.remove({ _id: id });
+  if (result) {
+    res.json("success")
+  }
+  else {
+    res.json("error")
+  }
+})
 
 //update-same issue of params and hexadecimal,string
-// router.put('/update', async function (req, res) {
-//   let updatedDoc = {
-//     $set: {
-//       username: req.body.username,
-//       password: req.body.password,
-//       phonenumber: req.body.phonenumber,
-//       name: req.body.name,
-//       gender: req.body.gender,
-//       age: req.body.age,
-//       role: req.body.role
-//     }
-//   };
+router.put('/update', async function (req, res) {
+  let updatedDoc = {
+    $set: {
+      username: req.body.username,
+      password: req.body.password,
+      phonenumber: req.body.phonenumber,
+      name: req.body.name,
+      gender: req.body.gender,
+      age: req.body.age,
+      role: req.body.role
+    }
+  };
+  console.log(req.body,'req body')
+  updated = await users.updateOne({ _id: req.body.id }, updatedDoc,async (error, data) =>{
+    if(error){
+      res.status(200).json('update not working',err)
+    }
+    else{
+      res.json('working')
+  }
+  }).clone()
 
-//   updated = await users.updateOne({ _id: "6203c3e74298ca89918851ff" }, updatedDoc)
-//   if (updated) {
-//     res.json("success")
-//   }
-//   else {
-//     res.json()
-//   }
-// })
+})
 
 module.exports = router;
