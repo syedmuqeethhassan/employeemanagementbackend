@@ -118,15 +118,8 @@ else{
 }
 
 
-  // if (userExists != null) {
-  //   res.status(200).json('user exists')
-  // }
-  // else {
-  //   users.create(userObject, { runValidators: true })
-  //   res.status(200).json('inserted')
-  // }
+
 })
-// issue with param and hexadecimal,string
 router.delete('/delete/:id', async function (req, res) {
   let id = req.params.id
   console.log(id)
