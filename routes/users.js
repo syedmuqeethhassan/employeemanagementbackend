@@ -15,7 +15,7 @@ router.get('/users', function (req, res, next) {
       res.json(err);
     }
     res.type('json');
-    res.status(200).json(users);
+    res.json(users);
   }
   );
 });
@@ -85,8 +85,6 @@ else{
         }
         
       })
-
-    // res.status(200).json('inserted')
   }
 }
 }
@@ -99,10 +97,10 @@ router.delete('/delete/:id', async function (req, res) {
   console.log(id)
   result = await users.remove({ _id: id });
   if (result) {
-    res.json({message:"success"})
+    res.json({message:"user removed"})
   }
   else {
-    res.json({message:"error"})
+    res.json({message:"error, user not removed"})
   }
 })
 
@@ -131,6 +129,19 @@ router.put('/update/:id', async function (req, res) {
 
 })
 
+
+
+router.get('/get-users',function (req,res){
+  users.find({}, {name:1,_id:0 },(error,data)=>{
+    if(error){
+      res.json({message:'cannot find users'})
+    }
+    else{
+      let users = data.map(a => a.name);
+      res.json(users)
+    }
+  })
+})
 
 // router.post('/change-password/:id',async function (req,res){
 //   currentPassword=req.body.currentPassword,

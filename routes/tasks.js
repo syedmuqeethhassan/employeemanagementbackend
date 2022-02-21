@@ -26,11 +26,12 @@ router.get('/', function (req, res, next) {
        }
     tasks.create(taskObject,function (err, task) {
       if (err) {
-        res.json(err);
+        res.json({message:'error ,task not created',code:400});
       }
-      res.json({message:'task created'});
+      else{
+      res.json('task created');
     }
-    );
+  });
   });
 router.put('/update-task/:id', async function(req,res,next){
 
@@ -44,12 +45,12 @@ updateDoc={
     updateddate:req.body.updateddate,
   }
 }
-let update= await tasks.updateOne({_id:req.params.id},updateDoc,async (error,data)=>{
+tasks.updateOne({_id:req.params.id},updateDoc,async (error,data)=>{
   if(error){
-    res.json({message:'update not done'})
+    res.json('update not done')
   }
   else{
-    res.json({message:'update successful'})
+    res.json('update successful')
   }
 }).clone()
 })
@@ -58,12 +59,12 @@ let update= await tasks.updateOne({_id:req.params.id},updateDoc,async (error,dat
 
 
 router.delete('/delete-task/:id',async function (req,res){
-  let deletetask=await tasks.remove({_id:req.params.id},(err,result)=>{
+tasks.remove({_id:req.params.id},(err,result)=>{
     if(err){
-      res.json({message: 'delete unsuccessful'})
+      res.json('delete unsuccessful')
     }
     else{
-      res.json({message:'delete succesful'})
+      res.json('delete succesful')
     }
   }).clone()
 })
