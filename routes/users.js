@@ -8,16 +8,7 @@ var ObjectID = require('mongodb').ObjectID;
 const bcrypt = require("bcrypt");
 
 /* GET users listing. */
-router.get('/', function (req, res, next) {
-  users.find(function (err, users) {
-    if (err) {
-      res.json(err);
-    }
-    res.type('json');
-    res.status(200).json(users);
-  }
-  );
-});
+
 router.get('/users', function (req, res, next) {
   users.find(function (err, users) {
     if (err) {
@@ -28,17 +19,6 @@ router.get('/users', function (req, res, next) {
   }
   );
 });
-router.post('/', function (req, res, next) {
-  users.find(function (err, users) {
-    if (err) {
-      res.json(err);
-    }
-    res.type('json');
-    res.status(200).json(users);
-  }
-  );
-});
-//login api below
 router.post('/login',async function (req, res, next) {
   
   users.findOne({ username: req.body.username },async (error, data) => {
@@ -55,13 +35,10 @@ router.post('/login',async function (req, res, next) {
       res.json(data)
     }
     else{
-      res.status(400).json("usuccessful login")
+      res.json({message:"usuccessful login"})
     }
     } 
   })
-  
-    
-
 });
 
 //add user api
@@ -70,8 +47,8 @@ router.post('/add-user', async function (req, res) {
   const salt = await bcrypt.genSalt(10);
   userObject = {
     'username': req.body.username,
-    'password': req.body.password,
     'phonenumber': req.body.phonenumber,
+    'password':req.body.password,
     'name': req.body.name,
     'gender': req.body.gender,
     'age': req.body.age,
@@ -83,11 +60,11 @@ router.post('/add-user', async function (req, res) {
  console.log("number in string",numberStr)
   if(!patternNumber.test(numberStr))
 {
-  res.send("number is incorrect")
+  res.json({message:"number is incorrect",code:400})
 }
 else{
   if(!usernameTest){
-    res.send("incorrect username")
+    res.json({message:"incorrect username",code:400})
   }
   else{
   userObject.password = await bcrypt.hash(userObject.password, salt);
@@ -95,23 +72,20 @@ else{
     userExists = await users.findOne({ username: req.body.username });
   }
   catch (error) {
-    res.send(error);
+    res.json({message:error,code:400});
   }
   if (userExists) {
-    res.send('user already exist')
+    res.json({message: "user already exists", code:400})
   } else {
-    try {
       users.create(userObject, (err, data) => {
         if(err){
-          res.send({ err: err});
+          res.json({ message: err,code:400});
         } else{
-          res.json(userObject)
+          res.json({message: "user created ", code:200})
         }
         
       })
-    } catch (e) {
-      res.send({ err: e })
-    }
+
     // res.status(200).json('inserted')
   }
 }
@@ -125,15 +99,15 @@ router.delete('/delete/:id', async function (req, res) {
   console.log(id)
   result = await users.remove({ _id: id });
   if (result) {
-    res.json("success")
+    res.json({message:"success"})
   }
   else {
-    res.json("error")
+    res.json({message:"error"})
   }
 })
 
 //update-same issue of params and hexadecimal,string
-router.put('/update', async function (req, res) {
+router.put('/update/:id', async function (req, res) {
   let updatedDoc = {
     $set: {
       username: req.body.username,
@@ -146,15 +120,43 @@ router.put('/update', async function (req, res) {
     }
   };
   console.log(req.body,'req body')
-  updated = await users.updateOne({ _id: req.body.id }, updatedDoc,async (error, data) =>{
+  users.updateOne({ _id: req.params.id }, updatedDoc, (error, data) =>{
     if(error){
-      res.status(200).json('update not working',err)
+      res.json({message:'update not working'})
     }
     else{
-      res.json('working')
+      res.json({message:'working'})
   }
   }).clone()
 
 })
 
+
+// router.post('/change-password/:id',async function (req,res){
+//   currentPassword=req.body.currentPassword,
+//   newPassword=req.body.newPassword,
+//   confirmPassword=req.body.confirmPassword
+//   const salt = await bcrypt.genSalt(10);
+//   updateDoc={
+//     $set:{
+//       password:confirmPassword
+//     }
+//   }
+//   updateDoc.password = await bcrypt.hash(updateDoc.password, salt);
+//   users.find({password:currentPassword},function(err,result){
+//     if(err){
+//       res.status(400).json('password does not exist')
+//     }
+//     else{
+//       users.update({_id:req.params.id},updateDoc,function(err,result){
+//         if(err){
+//           res.status(401).json('error in chaning password')
+//         }
+//         else{
+//           res.status(200).json('password changed')
+//         }
+//       })
+//     }
+//   })
+// })
 module.exports = router;

@@ -7,7 +7,7 @@ router.get('/', function (req, res, next) {
         res.json(err);
       }
       res.type('json');
-      res.status(200).json(task);
+      res.json(task);
     }
     );
   });
@@ -28,11 +28,11 @@ router.get('/', function (req, res, next) {
       if (err) {
         res.json(err);
       }
-      res.status(200).json(task);
+      res.json({message:'task created'});
     }
     );
   });
-router.put('/update-task', async function(req,res,next){
+router.put('/update-task/:id', async function(req,res,next){
 
 updateDoc={
   $set:{
@@ -44,12 +44,12 @@ updateDoc={
     updateddate:req.body.updateddate,
   }
 }
-let update= await tasks.updateOne({_id:req.body.id},updateDoc,async (error,data)=>{
+let update= await tasks.updateOne({_id:req.params.id},updateDoc,async (error,data)=>{
   if(error){
-    res.json('update not done')
+    res.json({message:'update not done'})
   }
   else{
-    res.json('update successful')
+    res.json({message:'update successful'})
   }
 }).clone()
 })
@@ -60,10 +60,10 @@ let update= await tasks.updateOne({_id:req.body.id},updateDoc,async (error,data)
 router.delete('/delete-task/:id',async function (req,res){
   let deletetask=await tasks.remove({_id:req.params.id},(err,result)=>{
     if(err){
-      res.json('delete unsuccessful')
+      res.json({message: 'delete unsuccessful'})
     }
     else{
-      res.json('delete succesful')
+      res.json({message:'delete succesful'})
     }
   }).clone()
 })
