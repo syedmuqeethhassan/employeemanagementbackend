@@ -104,7 +104,7 @@ router.delete('/delete/:id', async function (req, res) {
   }
 })
 
-//update-same issue of params and hexadecimal,string
+
 router.put('/update/:id', async function (req, res) {
   let updatedDoc = {
     $set: {
@@ -143,31 +143,33 @@ router.get('/get-users',function (req,res){
   })
 })
 
-// router.post('/change-password/:id',async function (req,res){
-//   currentPassword=req.body.currentPassword,
-//   newPassword=req.body.newPassword,
-//   confirmPassword=req.body.confirmPassword
-//   const salt = await bcrypt.genSalt(10);
-//   updateDoc={
-//     $set:{
-//       password:confirmPassword
-//     }
-//   }
-//   updateDoc.password = await bcrypt.hash(updateDoc.password, salt);
-//   users.find({password:currentPassword},function(err,result){
-//     if(err){
-//       res.status(400).json('password does not exist')
-//     }
-//     else{
-//       users.update({_id:req.params.id},updateDoc,function(err,result){
-//         if(err){
-//           res.status(401).json('error in chaning password')
-//         }
-//         else{
-//           res.status(200).json('password changed')
-//         }
-//       })
-//     }
-//   })
-// })
+router.post('/change-password/:id',async function (req,res){
+  currentPassword=req.body.currentPassword,
+  newPassword=req.body.newPassword,
+  confirmPassword=req.body.confirmPassword
+  const salt = await bcrypt.genSalt(10);
+
+  confirmPassword = await bcrypt.hash(confirmPassword, salt);
+  updateDoc={
+    $set:{
+      password:confirmPassword
+    }
+  }
+  
+  users.find({password:currentPassword,_id:req.params.id},function(err,result){
+    if(err){
+      res.status(400).json('password does not exist')
+    }
+    else{
+      users.update({_id:req.params.id},updateDoc,function(err,result){
+        if(err){
+          res.status(401).json('error in chaning password')
+        }
+        else{
+          res.json('password changed')
+        }
+      })
+    }
+  })
+})
 module.exports = router;

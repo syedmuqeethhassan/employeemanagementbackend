@@ -61,7 +61,7 @@ tasks.updateOne({_id:req.params.id},updateDoc,async (error,data)=>{
 router.delete('/delete-task/:id',async function (req,res){
 tasks.remove({_id:req.params.id},(err,result)=>{
     if(err){
-      res.json('delete unsuccessful')
+      res.json({message:'delete unsuccessful',code:400})
     }
     else{
       res.json('delete succesful')
