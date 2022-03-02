@@ -10,7 +10,9 @@ var userSchema = new schema({
         name: String,
         gender: String,
         age: Number,
-        role: []
+        role: [],
+        createddate:Date,
+        isdelete:Number
 })
 
 var userSchema = mongoose.model('User', userSchema);

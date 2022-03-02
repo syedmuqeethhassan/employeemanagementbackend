@@ -10,20 +10,20 @@ const bcrypt = require("bcrypt");
 /* GET users listing. */
 
 router.get('/users', function (req, res, next) {
-  users.find(function (err, users) {
+  users.find({},null,{sort:{createddate:-1}},(function (err, users) {
     if (err) {
       res.json(err);
     }
     res.type('json');
     res.json(users);
   }
-  );
-});
+  ))
+  })
 router.post('/login',async function (req, res, next) {
   
   users.findOne({ username: req.body.username },async (error, data) => {
     if (error){
-      res.json({ 'error': error, code: 500 });
+      res.json({ 'error': error, code: 404 });
     }
     else{
       console.log('login else statement')
@@ -32,10 +32,10 @@ router.post('/login',async function (req, res, next) {
       const validPassword = await bcrypt.compare(req.body.password, data.password);
     if(validPassword){
       console.log(data,'data')
-      res.json(data)
+      res.json({message:'Login successful',code:200,data:data})
     }
     else{
-      res.json({message:"usuccessful login"})
+      res.json({message:'Unsuccessful login',code:402})
     }
     } 
   })
@@ -52,7 +52,9 @@ router.post('/add-user', async function (req, res) {
     'name': req.body.name,
     'gender': req.body.gender,
     'age': req.body.age,
-    'role': req.body.role
+    'role': req.body.role,
+    'createddate':req.body.createddate,
+    'isdelete':req.body.isdelete
   }
  let numberStr=req.body.phonenumber.toString()
  var patternNumber = new RegExp("^[0-9]{10}$");
@@ -60,11 +62,11 @@ router.post('/add-user', async function (req, res) {
  console.log("number in string",numberStr)
   if(!patternNumber.test(numberStr))
 {
-  res.json({message:"number is incorrect",code:400})
+  res.json({message:"Number is incorrect",code:400})
 }
 else{
   if(!usernameTest){
-    res.json({message:"incorrect username",code:400})
+    res.json({message:"Incorrect username",code:400})
   }
   else{
   userObject.password = await bcrypt.hash(userObject.password, salt);
@@ -75,13 +77,13 @@ else{
     res.json({message:error,code:400});
   }
   if (userExists) {
-    res.json({message: "user already exists", code:400})
+    res.json({message: "User already exists", code:400})
   } else {
       users.create(userObject, (err, data) => {
         if(err){
           res.json({ message: err,code:400});
         } else{
-          res.json({message: "user created ", code:200})
+          res.json({message: "User created ", code:200})
         }
         
       })
@@ -89,18 +91,18 @@ else{
 }
 }
 
-
+ 
 
 })
 router.delete('/delete/:id', async function (req, res) {
   let id = req.params.id
   console.log(id)
-  result = await users.remove({ _id: id });
+  result = await users.updateOne({ _id: id },{$set:{isdelete:1}});
   if (result) {
-    res.json({message:"user removed"})
+    res.json({message:"User removed"})
   }
   else {
-    res.json({message:"error, user not removed"})
+    res.json({message:"Error, user not removed"})
   }
 })
 
@@ -118,12 +120,12 @@ router.put('/update/:id', async function (req, res) {
     }
   };
   console.log(req.body,'req body')
-  users.updateOne({ _id: req.params.id }, updatedDoc, (error, data) =>{
+  users.findOneAndUpdate({ _id: req.params.id }, updatedDoc,{ "new": true}, (error, data) =>{
     if(error){
-      res.json({message:'update not working'})
+      res.json({message:'Update not working'})
     }
     else{
-      res.json({message:'working'})
+      res.json({data:data,message:'Update successful'})
   }
   }).clone()
 
@@ -134,7 +136,7 @@ router.put('/update/:id', async function (req, res) {
 router.get('/get-users',function (req,res){
   users.find({}, {name:1,_id:0 },(error,data)=>{
     if(error){
-      res.json({message:'cannot find users'})
+      res.json({message:'Cannot find users'})
     }
     else{
       let users = data.map(a => a.name);
@@ -148,7 +150,7 @@ router.post('/change-password/:id',async function (req,res){
   newPassword=req.body.newPassword,
   confirmPassword=req.body.confirmPassword
   const salt = await bcrypt.genSalt(10);
-
+console.log(req.body.currentPassword,'currentpassword')
   confirmPassword = await bcrypt.hash(confirmPassword, salt);
   updateDoc={
     $set:{
@@ -156,20 +158,23 @@ router.post('/change-password/:id',async function (req,res){
     }
   }
   
-  users.find({password:currentPassword,_id:req.params.id},function(err,result){
-    if(err){
-      res.status(400).json('password does not exist')
-    }
+  users.findOne({_id:req.params.id},async function(err,result){
+    if(err) {
+      res.json({message:'Error in process',code:402})
+    } else {
+      const validPassword = await bcrypt.compare(req.body.currentPassword, result.password);
+      if(validPassword){
+        users.updateOne({_id:req.params.id},{password:confirmPassword},function(err,result){
+          if(err) {
+            res.json({message:'Password not changed 1',code:401})
+          } else {
+            res.json({message:'Password changed',code:200})
+          }
+        })
+     }
     else{
-      users.update({_id:req.params.id},updateDoc,function(err,result){
-        if(err){
-          res.status(401).json('error in chaning password')
-        }
-        else{
-          res.json('password changed')
-        }
-      })
-    }
+      res.json({message:'Password not changed 2',code:401})
+    } }
   })
 })
 module.exports = router;

@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var tasks = require("../models/tasks");
 router.get('/', function (req, res, next) {
-    tasks.find(function (err, task) {
+    tasks.find({},null,{sort:{updateddate:-1}},function (err, task) {
       if (err) {
         res.json(err);
       }
@@ -26,10 +26,10 @@ router.get('/', function (req, res, next) {
        }
     tasks.create(taskObject,function (err, task) {
       if (err) {
-        res.json({message:'error ,task not created',code:400});
+        res.json({message:'Error ,task not created',code:400});
       }
       else{
-      res.json('task created');
+      res.json({message:'Task created',code:200});
     }
   });
   });
@@ -47,10 +47,10 @@ updateDoc={
 }
 tasks.updateOne({_id:req.params.id},updateDoc,async (error,data)=>{
   if(error){
-    res.json('update not done')
+    res.json({message:'Update not done',code:400})
   }
   else{
-    res.json('update successful')
+    res.json({message:'Update successful',code:200})
   }
 }).clone()
 })
@@ -61,10 +61,10 @@ tasks.updateOne({_id:req.params.id},updateDoc,async (error,data)=>{
 router.delete('/delete-task/:id',async function (req,res){
 tasks.remove({_id:req.params.id},(err,result)=>{
     if(err){
-      res.json({message:'delete unsuccessful',code:400})
+      res.json({message:'Delete unsuccessful',code:400})
     }
     else{
-      res.json('delete succesful')
+      res.json({message:'Delete succesful',code:200})
     }
   }).clone()
 })
